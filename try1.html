@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Let's Journal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #80f0f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            height: 100vh;
+        }
+        .wrapper {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .container {
+            width: 60%; /* Adjusted width of the journal section */
+            margin-left: 20px; /* Space between journal and calendar */
+            padding: 20px;
+            background-color: rgb(124, 154, 181);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            background-color: #7f819e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: rgb(90, 90, 101);
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .entries {
+            display: flex;
+            flex-direction: column;
+        }
+        .entry {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .entry h3 {
+            margin: 0;
+        }
+        .entry p {
+            margin: 5px 0;
+        }
+        .entry-actions {
+            text-align: right;
+        }
+        .entry-actions button {
+            margin: 5px;
+        }
+        .calendar-container {
+            width: 30%; /* Adjusted width of the calendar */
+            padding: 20px;
+            background-color: rgb(124, 154, 181); /* Same background color as journal */
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px; /* Top margin for calendar */
+        }
+        .calendar-header {
+            font-weight: 500;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px; /* Smaller gap between days */
+            text-align: center;
+        }
+        .day {
+            padding: 5px; /* Smaller padding for days */
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 14px; /* Smaller font size for day numbers */
+        }
+        .current-day {
+            background-color: #7f819e; /* Highlight current day */
+            color: white;
+        }
+        .hidden-journal-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e8e8e8;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .hidden-entry {
+            background-color: #fff;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .hidden-entry button {
+            background-color: #d9534f; /* Red for restore */
+        }
+        .search-container {
+            display: flex;
+            justify-content: flex-end; /* Align search bar to the right */
+            margin-bottom: 10px;
+        }
+        .search-container input {
+            width: 250px; /* Width for search input */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .password-container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+        .password-container input {
+            margin-bottom: 10px;
+        }
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px; /* Maximum width for modal */
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- Calendar Section -->
+    <div class="calendar-container">
+        <div class="calendar-header" id="currentDate">
+            <!-- Current date will be inserted here -->
+        </div>
+        <div class="calendar-grid" id="calendarDays">
+            <!-- Days of the month will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Journal Section -->
+    <div class="container">
+        <h1>My Journal</h1>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchDate" placeholder="Search by date (MM/DD/YYYY)">
+            <button onclick="searchByDate()">Search</button>
+        </div>
+
+        <!-- Journal Entry Form -->
+        <form id="journalForm">
+            <input type="text" id="journalTitle" placeholder="Title" required>
+            <textarea id="journalContent" rows="5" placeholder="Write your thoughts..." required></textarea>
+            <button type="submit">Save Entry</button>
+        </form>
+
+        <!-- Journal Entries -->
+        <div class="entries" id="journalEntries">
+            <!-- Entries will be dynamically inserted here -->
+        </div>
+
+        <!-- Hidden Journal Section -->
+        <div class="hidden-journal-container">
+            <h2>Hidden Journal Entries</h2>
+            <button onclick="showModal()">Access Hidden Entries</button>
+        </div>
+
+        <!-- Password Management -->
+        <div class="password-container">
+            <h3>Manage Password</h3>
+            <input type="password" id="passwordInput" placeholder="Set new password">
+            <button onclick="setPassword()">Set Password</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Password Input -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Enter Password to Access Hidden Entries</h2>
+        <input type="password" id="modalPassword" placeholder="Enter Password">
+        <button onclick="checkPassword()">Submit</button>
+        <div id="errorMessage" style="color: red; display: none;">Incorrect password!</div>
+    </div>
+</div>
+
+<script>
+    let journalEntries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+    let hiddenEntries = JSON.parse(localStorage.getItem('hiddenEntries')) || [];
+    let password = localStorage.getItem('journalPassword') || '';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        displayCalendar();
+        displayEntries();
+    });
+
+    document.getElementById('journalForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const title = document.getElementById('journalTitle').value;
+        const content = document.getElementById('journalContent').value;
+        const date = new Date().toLocaleDateString();
+        journalEntries.push({ title, content, date });
+        localStorage.setItem('journalEntries', JSON.stringify(journalEntries));
+        displayEntries();
+        this.reset();
+    });
+
+    function displayEntries() {
+        const entriesContainer = document.getElementById('journalEntries');
+        entriesContainer.innerHTML = '';
+        journalEntries.forEach((entry, index) => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'entry';
+            entryDiv.innerHTML = `
+                <h3>${entry.title}</h3>
+                <p>${entry.content}</p>
+                <p><small>${entry.date}</small></p>
+                <div class="entry-actions">
+                    <button onclick="hideEntry(${index})">Hide</button>
+                    <button onclick="deleteEntry(${index})">Delete</button>
+                </div>
+            `;
+            entriesContainer.appendChild(entryDiv);
+        });
+    }
+
+    function hideEntry(index) {
+        hiddenEntries.push(journalEntries[index]);
+        journalEntries.splice(index, 1);
+        localStorage.setItem('journalEntries', JSON.stringify(journalEntries));
+        localStorage.setItem('hiddenEntries', JSON.stringify(hiddenEntries));
+        displayEntries();
+    }
+
+    function deleteEntry(index) {
+        journalEntries.splice(index, 1);
+        localStorage.setItem('journalEntries', JSON.stringify(journalEntries));
+        displayEntries();
+    }
+
+    function setPassword() {
+        const newPassword = document.getElementById('passwordInput').value;
+        password = newPassword;
+        localStorage.setItem('journalPassword', password);
+        document.getElementById('passwordInput').value = '';
+        alert('Password set successfully!');
+    }
+
+    function showModal() {
+        document.getElementById('passwordModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('passwordModal').style.display = 'none';
+        document.getElementById('modalPassword').value = '';
+        document.getElementById('errorMessage').style.display = 'none';
+    }
+
+    function checkPassword() {
+        const enteredPassword = document.getElementById('modalPassword').value;
+        if (enteredPassword === password) {
+            closeModal();
+            displayHiddenEntries();
+        } else {
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+    }
+
+    function displayHiddenEntries() {
+        const entriesContainer = document.querySelector('.hidden-journal-container');
+        entriesContainer.innerHTML = '<h2>Hidden Journal Entries</h2>';
+        hiddenEntries.forEach((entry, index) => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'hidden-entry';
+            entryDiv.innerHTML = `
+                <h3>${entry.title}</h3>
+                <p>${entry.content}</p>
+                <p><small>${entry.date}</small></p>
+                <button onclick="restoreEntry(${index})">Restore</button>
+            `;
+            entriesContainer.appendChild(entryDiv);
+        });
+    }
+
+    function restoreEntry(index) {
+        journalEntries.push(hiddenEntries[index]);
+        hiddenEntries.splice(index, 1);
+        localStorage.setItem('journalEntries', JSON.stringify(journalEntries));
+        localStorage.setItem('hiddenEntries', JSON.stringify(hiddenEntries));
+        displayHiddenEntries();
+        displayEntries();
+    }
+
+    function displayCalendar() {
+        const currentDate = new Date();
+        const month = currentDate.getMonth();
+        const year = currentDate.getFullYear();
+        document.getElementById('currentDate').innerText = currentDate.toLocaleString('default', { month: 'long' }) + ' ' + year;
+
+        const calendarDays = document.getElementById('calendarDays');
+        calendarDays.innerHTML = '';
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Fill the first week with empty days
+        for (let i = 0; i < firstDay; i++) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'day';
+            calendarDays.appendChild(emptyDiv);
+        }
+
+        // Fill the calendar with days
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'day';
+            dayDiv.innerText = day;
+            if (day === currentDate.getDate()) {
+                dayDiv.classList.add('current-day');
+            }
+            calendarDays.appendChild(dayDiv);
+        }
+    }
+
+    function searchByDate() {
+        const searchDate = document.getElementById('searchDate').value;
+        const dateEntries = journalEntries.filter(entry => entry.date === searchDate);
+        const entriesContainer = document.getElementById('journalEntries');
+        entriesContainer.innerHTML = '';
+        dateEntries.forEach(entry => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'entry';
+            entryDiv.innerHTML = `
+                <h3>${entry.title}</h3>
+                <p>${entry.content}</p>
+                <p><small>${entry.date}</small></p>
+            `;
+            entriesContainer.appendChild(entryDiv);
+        });
+        if (dateEntries.length === 0) {
+            entriesContainer.innerHTML = '<p>No entries found for this date.</p>';
+        }
+    }
+</script>
+</body>
+</html>
